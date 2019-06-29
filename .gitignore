@@ -4,6 +4,7 @@
 
 venv/
 **/__pycache__/
+**/target/
 .txt
 .DS_Store
 .~lock.README.txt#
