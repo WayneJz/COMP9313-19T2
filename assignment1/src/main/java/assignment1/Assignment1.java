@@ -26,31 +26,30 @@ public class Assignment1 {
             
             /*
                 n-gram queue:
-                If the length of queue is smaller than numberOfGram, then push word into it
+                Push the word into it
+                Then if the length of queue is smaller than numberOfGram, continue
                 Else, all words inside n-gram queue consist of the n-gram word
-                record the n-gram word to context, and pop the first word in the queue, then push the new word
-                and do next loop
+                record the n-gram word to context, and pop the first word in the queue, and do next loop
             */
 
             for (int i = 0; i < textWords.length; i ++) {
                 String singleWord = textWords[i];
+                ngramQueue.add(singleWord);			// Push the new word
+                
                 if (ngramQueue.size() < numberOfGram) {
-                    ngramQueue.add(singleWord);
+                    continue;
                 }
-                else {
-                    String ngramWord = "";	// N-gram word to be recorded
-                    for (int j = 0; j < ngramQueue.size(); j ++) {
-                        if (j > 0) {
-                            ngramWord += " ";
-                        }
-                        ngramWord += ngramQueue.get(j);
+                String ngramWord = "";	// N-gram word to be recorded
+                for (int j = 0; j < ngramQueue.size(); j ++) {
+                    if (j > 0) {
+                        ngramWord += " ";
                     }
-                    Text mapperValue = new Text(fileName + " ");
-                    Text mapperKey = new Text(ngramWord);
-                    context.write(mapperKey, mapperValue);		// Pass key and value into mapper
-                    ngramQueue.remove(0);					// Pop the first word in the queue
-                    ngramQueue.add(singleWord);				// Push the new word
+                    ngramWord += ngramQueue.get(j);
                 }
+                Text mapperValue = new Text(fileName + " ");
+                Text mapperKey = new Text(ngramWord);
+                context.write(mapperKey, mapperValue);		// Pass key and value into mapper
+                ngramQueue.remove(0);						// Pop the first word in the queue       				
             }
         }
     }
@@ -71,12 +70,13 @@ public class Assignment1 {
             if (sum < minSupport) {
                 return;
             }
-            result += Integer.toString(sum) + " ";			// Concatenate sums
+            result += Integer.toString(sum) + "  ";			// Concatenate sums
 
             Iterator<String> it = fileNames.iterator();		// Concatenate file names by treeset iterator
             while (it.hasNext()) {
-                result += it.next() + " ";
+                result += it.next();
             }
+            result = result.trim();							// Remove trailing spaces
             context.write(Wordkey, result);					// Write the result
         }
     }
@@ -92,17 +92,27 @@ public class Assignment1 {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
         
+        // Check if command-line arguments length correct
+        if (args.length != 4) {
+            System.out.println("Make sure 4 command-line arguments are provided!");
+            System.exit(1);
+        }
+        
         // Input by command-line arguments, exception handling
         try{
             numberOfGram = Integer.parseInt(args[0]);
             minSupport = Integer.parseInt(args[1]);
-            FileInputFormat.addInputPath(job, new Path(args[2]));
-            FileOutputFormat.setOutputPath(job, new Path(args[3]));
         }
         catch (NumberFormatException convertError){
-            System.out.println("Command-line Arguments malformed!");
+            System.out.println("The first two command-line arguments malformed! Integers expected.");
             System.exit(1);
         }
+        
+        Path inputDir = new Path(args[2]);
+        Path outputDir = new Path(args[3]); 
+
+        FileInputFormat.addInputPath(job, inputDir);
+        FileOutputFormat.setOutputPath(job, outputDir);
 
         // Wait for map-reduce job completed
         System.exit(job.waitForCompletion(true) ? 0 : 1);
