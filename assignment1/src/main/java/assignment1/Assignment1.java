@@ -13,6 +13,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+// COMP9313 2019T2 Assignment 1
+// Student: z5146092
+
 
 public class Assignment1 {
     private static int numberOfGram;	// Argument 0, number of gram
